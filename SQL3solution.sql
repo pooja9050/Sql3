@@ -50,7 +50,15 @@ FROM Activity
 GROUP BY activity_date Having activity_date > '2019-06-27' AND activity_date <= '2019-07-27';
 
 #2142. The Number of Passengers in Each Bus I
+# Write your MySQL query statement below
+WITH CTE AS (SELECT p.passenger_id, p.arrival_time, MIN(b.arrival_time) AS btime
+FROM Passengers p INNER JOIN Buses b ON p.arrival_time <=b.arrival_time
+GROUP BY p.passenger_id)
 
+SELECT b.bus_id, COUNT(c.btime) AS 'passengers_cnt' from Buses b 
+LEFT JOIN CTE c ON b.arrival_time  = c.btime
+GROUP BY b.bus_id
+ORDER BY b.bus_id;
 
 
 
