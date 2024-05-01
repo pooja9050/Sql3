@@ -28,7 +28,6 @@ WHERE DATEDIFF ('2019-07-27', activity_date) >=0  AND DATEDIFF ('2019-06-28', ac
 GROUP BY activity_date;
 
 
-
 SELECT activity_date AS 'day', Count(DISTINCT user_id) AS 'active_users'
 FROM Activity
 WHERE DATEDIFF ('2019-07-28', activity_date)  BETWEEN 0 AND 29 
@@ -60,6 +59,40 @@ LEFT JOIN CTE c ON b.arrival_time  = c.btime
 GROUP BY b.bus_id
 ORDER BY b.bus_id;
 
+
+#185. Department Top Three Salaries
+WITH CTE AS (
+    SELECT 
+        e.name AS EmployeeName,
+        e.departmentId, 
+        e.salary, 
+        DENSE_RANK() OVER (PARTITION BY e.departmentId ORDER BY e.salary DESC) AS rnk
+    FROM 
+        Employee e
+)
+SELECT 
+    d.name AS Department, 
+    c.EmployeeName AS Employee, 
+    c.salary AS Salary 
+FROM 
+    CTE c
+JOIN 
+    Department d ON c.departmentId = d.id 
+WHERE 
+    c.rnk <= 3;
+
+
+#2004 The Number of Seniors and Juniors to Join the Company
+# Write your MySQL query statement below
+WIth CTE AS (SELECT employee_id, experience, SUM(salary) OVER(PARTITION BY experience Order by salary) AS 'rsum'
+FROM Candidates)
+SELECT 'Senior' AS experience, COUNT(employee_id) AS 'accepted_candidates'
+FROM CTE WHERE experience = 'Senior' AND rsum <=70000
+UNION
+ SELECT 'Junior'AS experience, COUNT(employee_id) AS 'accepted_candidates'
+FROM CTE WHERE experience = 'Junior' AND rsum <=(
+    SELECT 70000 - IFNULL(Max(rsum),0) FROM CTE WHERE experience = 'Senior' AND rsum <=70000
+);
 
 
 
